@@ -12,7 +12,7 @@ openerp.pushodoo = function (session) {
                 notif_body = notif_body.concat(" notifications non lus");
                 console.log(notif_body);
                 var img = '/pushodoo/static/img/icon.png';
-                var notification = new Notification("ODOO Notification", {
+                var notification = new Notification("ODOO Notifications", {
                     body: notif_body,
                     icon: img,
                     url: ''

@@ -10,6 +10,7 @@ class config(models.Model):
         domain=lambda self: [('model', '=', self._name)], auto_join=True, track_visibility='onchange', )
 
     active = fields.Boolean('Active', track_visibility='onchange', )
+    # module_name = fields.One2many()
 
     @api.multi
     @api.returns('self', lambda value: value.id)
