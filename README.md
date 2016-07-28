@@ -1,2 +1,2 @@
 # odoopushnotification
-Pushnotification for odoo 8.0
+Pushnotification for odoo 9.0
