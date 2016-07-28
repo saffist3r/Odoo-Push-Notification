@@ -1,0 +1,12 @@
+<openerp>
+  <data>
+    <!-- Top menu item -->
+
+    <menuitem name="pushodoo" id="pushodoo.menu_root"/>
+
+    <!-- menu categories -->
+
+    <menuitem name="Menu 1" id="pushodoo.menu_1" parent="pushodoo.menu_root"/>
+    <menuitem name="Menu 2" id="pushodoo.menu_2" parent="pushodoo.menu_root"/>
+  </data>
+</openerp>
