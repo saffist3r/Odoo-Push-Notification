@@ -1,7 +1,18 @@
 # -*- coding: utf-8 -*-
 from openerp import models, fields, api, http
 import requests
+import datetime
 import json
+from json import dumps
+
+
+def json_serial(obj):
+    if isinstance(obj, datetime.datetime):
+        serial = obj.isoformat()
+        return serial
+    raise TypeError("Type not serializable")
+
+
 class config(models.Model):
     _name = 'pushodoo.config'
     _inherit = 'mail.thread'
@@ -11,10 +22,12 @@ class config(models.Model):
 
     active = fields.Boolean('Active', track_visibility='onchange', )
     last_notification = fields.Date()
+
     @api.one
     def get_module_names(self):
         self._cr.execute("select name from ir_module_module where state='installed'")
         return self._cr.fetchall()
+
     @api.multi
     @api.returns('self', lambda value: value.id)
     def message_post(self, body='', subject=None, message_type='notification',
@@ -157,7 +170,7 @@ class config(models.Model):
 
         payload = {"app_id": "8e30f91d-9796-490d-a32b-1d0f451cc29c",
                    "included_segments": ["All"],
-                   "contents": {"en": body  }}
+                   "contents": {"en": body}}
         req = requests.post("https://onesignal.com/api/v1/notifications", headers=header, data=json.dumps(payload))
         # TEST NOTIF LOCAL
         # print self.message_ids
@@ -191,7 +204,12 @@ class config(models.Model):
         # print(req)
         self._cr.execute(req)
         count = 0
+        last_tim = ""
+        bod = ""
         for result in self._cr.fetchall():
             count += 1
-            print result
-        return {"nb": count}
+            bod = result[11]
+            last_tim = result[1]
+        last_notification_aux = config.last_notification
+        config.last_notification = dumps(datetime.datetime.now(), default=json_serial)
+        return {"nb": count, "notif": bod, "time": last_notification_aux,"last_notif":last_tim}

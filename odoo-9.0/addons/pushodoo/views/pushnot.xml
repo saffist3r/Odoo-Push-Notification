@@ -21,7 +21,6 @@
                     <sheet>
                         <group string="Config">
                             <field name="active"/>
-                            <field name="module_name"/>
                         </group>
                     </sheet>
 
