@@ -4,14 +4,17 @@ import requests
 import json
 class config(models.Model):
     _name = 'pushodoo.config'
-    _inherit = ['mail.thread']
+    _inherit = 'mail.thread'
     message_ids = fields.One2many(
         'mail.message', 'res_id', string='Messages',
         domain=lambda self: [('model', '=', self._name)], auto_join=True, track_visibility='onchange', )
 
     active = fields.Boolean('Active', track_visibility='onchange', )
-    # module_name = fields.One2many()
-
+    last_notification = fields.Date()
+    @api.one
+    def get_module_names(self):
+        self._cr.execute("select name from ir_module_module where state='installed'")
+        return self._cr.fetchall()
     @api.multi
     @api.returns('self', lambda value: value.id)
     def message_post(self, body='', subject=None, message_type='notification',
@@ -149,13 +152,13 @@ class config(models.Model):
             values.pop(x, None)
         # --------------------------------------------------------------------------------------------
         # TEST NOTIF WEB
-        # header = {"Content-Type": "application/json",
-        #           "Authorization": "Basic MDE4YWU4ZjUtYjBjOC00MDQ5LTg1OWQtODdiNDc1YTEzZjRk"}
-        #
-        # payload = {"app_id": "8e30f91d-9796-490d-a32b-1d0f451cc29c",
-        #            "included_segments": ["All"],
-        #            "contents": {"en": body  }}
-        # req = requests.post("https://onesignal.com/api/v1/notifications", headers=header, data=json.dumps(payload))
+        header = {"Content-Type": "application/json",
+                  "Authorization": "Basic MDE4YWU4ZjUtYjBjOC00MDQ5LTg1OWQtODdiNDc1YTEzZjRk"}
+
+        payload = {"app_id": "8e30f91d-9796-490d-a32b-1d0f451cc29c",
+                   "included_segments": ["All"],
+                   "contents": {"en": body  }}
+        req = requests.post("https://onesignal.com/api/v1/notifications", headers=header, data=json.dumps(payload))
         # TEST NOTIF LOCAL
         # print self.message_ids
         # print self.message_follower_ids
@@ -190,4 +193,5 @@ class config(models.Model):
         count = 0
         for result in self._cr.fetchall():
             count += 1
+            print result
         return {"nb": count}
