@@ -34,7 +34,7 @@ openerp.pushodoo = function (session) {
                     }
                 }
             });
-        }, 60000);
+        }, 10000);
     }
 
     openerp.web.WebClient.include({

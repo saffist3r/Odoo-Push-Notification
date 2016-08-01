@@ -13,6 +13,11 @@ def json_serial(obj):
     raise TypeError("Type not serializable")
 
 
+class Message(models.Model):
+    _inherit = 'mail.message'
+    is_notified = fields.Boolean('is notified', default=False)
+
+
 class config(models.Model):
     _name = 'pushodoo.config'
     _inherit = 'mail.thread'
@@ -21,12 +26,7 @@ class config(models.Model):
         domain=lambda self: [('model', '=', self._name)], auto_join=True, track_visibility='onchange', )
 
     active = fields.Boolean('Active', track_visibility='onchange', )
-    last_notification = fields.Date()
-
-    @api.one
-    def get_module_names(self):
-        self._cr.execute("select name from ir_module_module where state='installed'")
-        return self._cr.fetchall()
+    is_checked = fields.Boolean()
 
     @api.multi
     @api.returns('self', lambda value: value.id)
@@ -158,6 +158,7 @@ class config(models.Model):
             'attachment_ids': attachment_ids,
             'subtype_id': subtype_id,
             'partner_ids': [(4, pid) for pid in partner_ids],
+            'is_notified': False,
         })
 
         # Avoid warnings about non-existing fields
@@ -196,19 +197,14 @@ class config(models.Model):
                 'mail_create_nosubscribe'):
             self.message_subscribe([new_message.author_id.id], force=False)
         return new_message
+
     @api.model
     def nb_notif(self):
-        req = "select * from  mail_message m where m.id in( select mail_message_id from mail_message_res_partner_needaction_rel where res_partner_id in (select partner_id from res_users where id = "
+        req = "select * from  mail_message m where is_notified='False' AND m.id in( select mail_message_id from mail_message_res_partner_needaction_rel where res_partner_id in (select partner_id from res_users where id = "
         req += str(self._uid)
         req += "))"
-        # req += str(self._uid)
-        # req += ")) AND m.create_date ="
-        # req += str(config.last_notification)
-        # req += ""
-        # print(config.last_notification)
         self._cr.execute(req)
         count = 0
-        last_tim = ""
         bod = []
         sub = []
         for result in self._cr.fetchall():
@@ -216,4 +212,8 @@ class config(models.Model):
             bod.append(result[11])
             sub.append(result[5])
         config.last_notification = dumps(datetime.datetime.now(), default=json_serial)
-        return {"nb": count, "notifs": bod,"subs":sub}
+        req = "UPDATE mail_message m SET is_notified='True' where m.id in( select mail_message_id from mail_message_res_partner_needaction_rel where res_partner_id in (select partner_id from res_users where id = "
+        req += str(self._uid)
+        req += "))"
+        self._cr.execute(req)
+        return {"nb": count, "notifs": bod, "subs": sub}
