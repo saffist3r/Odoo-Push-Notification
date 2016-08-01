@@ -165,13 +165,13 @@ class config(models.Model):
             values.pop(x, None)
         # --------------------------------------------------------------------------------------------
         # TEST NOTIF WEB
-        header = {"Content-Type": "application/json",
-                  "Authorization": "Basic MDE4YWU4ZjUtYjBjOC00MDQ5LTg1OWQtODdiNDc1YTEzZjRk"}
-
-        payload = {"app_id": "8e30f91d-9796-490d-a32b-1d0f451cc29c",
-                   "included_segments": ["All"],
-                   "contents": {"en": body}}
-        req = requests.post("https://onesignal.com/api/v1/notifications", headers=header, data=json.dumps(payload))
+        # header = {"Content-Type": "application/json",
+        #           "Authorization": "Basic MDE4YWU4ZjUtYjBjOC00MDQ5LTg1OWQtODdiNDc1YTEzZjRk"}
+        #
+        # payload = {"app_id": "8e30f91d-9796-490d-a32b-1d0f451cc29c",
+        #            "included_segments": ["All"],
+        #            "contents": {"en": body}}
+        # req = requests.post("https://onesignal.com/api/v1/notifications", headers=header, data=json.dumps(payload))
         # TEST NOTIF LOCAL
         # print self.message_ids
         # print self.message_follower_ids
@@ -201,15 +201,19 @@ class config(models.Model):
         req = "select * from  mail_message m where m.id in( select mail_message_id from mail_message_res_partner_needaction_rel where res_partner_id in (select partner_id from res_users where id = "
         req += str(self._uid)
         req += "))"
-        # print(req)
+        # req += str(self._uid)
+        # req += ")) AND m.create_date ="
+        # req += str(config.last_notification)
+        # req += ""
+        # print(config.last_notification)
         self._cr.execute(req)
         count = 0
         last_tim = ""
-        bod = ""
+        bod = []
+        sub = []
         for result in self._cr.fetchall():
             count += 1
-            bod = result[11]
-            last_tim = result[1]
-        last_notification_aux = config.last_notification
+            bod.append(result[11])
+            sub.append(result[5])
         config.last_notification = dumps(datetime.datetime.now(), default=json_serial)
-        return {"nb": count, "notif": bod, "time": last_notification_aux,"last_notif":last_tim}
+        return {"nb": count, "notifs": bod,"subs":sub}
