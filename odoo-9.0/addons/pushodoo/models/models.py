@@ -204,9 +204,11 @@ class config(models.Model):
         count = 0
         bod = []
         sub = []
+        users = []
         base = ""
         req = "select value from ir_config_parameter where key LIKE 'web.base.url'"
         id = []
+        user_id = []
         self._cr.execute(req)
         for result in self._cr.fetchall():
             base = result[0]
@@ -219,15 +221,18 @@ class config(models.Model):
             bod.append(result[11])
             sub.append(result[5])
             id.append(result[0])
-            print(result[0])
+            user_id.append(result[4])
         config.last_notification = dumps(datetime.datetime.now(), default=json_serial)
         req = "UPDATE mail_message m SET is_notified='True' where m.id in( select mail_message_id from mail_message_res_partner_needaction_rel where res_partner_id in (select partner_id from res_users where id = "
         req += str(self._uid)
         req += "))"
         self._cr.execute(req)
-        req = "select partner_id from res_users where id = "
-        req += str(self._uid)
-        self._cr.execute(req)
-        for result in self._cr.fetchall():
-            user_id = result[0]
-        return {"nb": count, "notifs": bod, "subs": sub, "base": base, "id": id, "user_id": user_id}
+        i = 0
+        for test in user_id:
+            req = "select partner_id from res_users where id = "
+            req += str(test)
+            self._cr.execute(req)
+            for result in self._cr.fetchall():
+                users.append(result[0])
+                print result[0]
+        return {"nb": count, "notifs": bod, "subs": sub, "base": base, "id": id, "user_id": users}

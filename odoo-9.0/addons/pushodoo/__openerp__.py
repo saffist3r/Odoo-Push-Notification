@@ -25,7 +25,7 @@
     'data': [
         'security/ir.model.access.csv',
         # 'views/pushnot.xml',
-        # 'views/notifications.xml',
+        'views/notifications.xml',
     ],
     # only loaded in demonstration mode
     'demo': [
