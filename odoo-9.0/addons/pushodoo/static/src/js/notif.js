@@ -23,7 +23,7 @@ openerp.pushodoo = function (session) {
                         notif_body = result['notifs'][i].replace(/<(?:.|\n)*?>/gm, '');
                         notif_title = result['subs'][i];
                         if (notif_title == null)
-                            notif_title = "ODOO Notification";
+                            notif_title = "ODOO 9.0 Notification";
                         var notification = new Notification(notif_title, {
                             body: notif_body,
                             icon: img,
