@@ -21,6 +21,8 @@ openerp.pushodoo = function (session) {
                         var msg_id = result['id'][i].toString();
                         base_url = base_url.concat(msg_id);
                         notif_body = result['notifs'][i].replace(/<(?:.|\n)*?>/gm, '');
+                        if (notif_body =="")
+                            notif_body = "You have a new Notification"
                         notif_title = result['subs'][i];
                         if (notif_title == null)
                             notif_title = "ODOO 9.0 Notification";
@@ -29,7 +31,7 @@ openerp.pushodoo = function (session) {
                             icon: img,
                         });
                         notification.onclick = function (event) {
-                            event.preventDefault(); // empêche le navigateur de donner le focus à l'onglet relatif à la notification
+                            event.preventDefault();
                             window.open(base_url, '_blank');
                         }
                     }
