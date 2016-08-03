@@ -19,12 +19,11 @@
     'version': '0.1',
 
     # any module necessary for this one to work correctly
-    'depends': ['base','sale','mail'],
+    'depends': ['base','mail'],
 
     # always loaded
     'data': [
-        'security/ir.model.access.csv',
-        # 'views/pushnot.xml',
+        # 'security/ir.model.access.csv',
         'views/notifications.xml',
     ],
     # only loaded in demonstration mode

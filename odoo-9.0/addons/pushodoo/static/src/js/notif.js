@@ -21,7 +21,7 @@ openerp.pushodoo = function (session) {
                         var msg_id = result['id'][i].toString();
                         base_url = base_url.concat(msg_id);
                         notif_body = result['notifs'][i].replace(/<(?:.|\n)*?>/gm, '');
-                        if (notif_body =="")
+                        if (!notif_body)
                             notif_body = "You have a new Notification"
                         notif_title = result['subs'][i];
                         if (notif_title == null)
