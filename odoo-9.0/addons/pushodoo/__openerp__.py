@@ -23,7 +23,6 @@
 
     # always loaded
     'data': [
-        # 'security/ir.model.access.csv',
         'views/notifications.xml',
     ],
     # only loaded in demonstration mode
