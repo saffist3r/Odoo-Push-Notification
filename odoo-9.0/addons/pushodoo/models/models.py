@@ -202,7 +202,6 @@ class MailThread(models.Model):
 
     @api.model
     def nb_notif(self):
-        notify_me = False
         count = 0
         bod = []
         sub = []
@@ -222,25 +221,24 @@ class MailThread(models.Model):
         req += "))"
         self._cr.execute(req)
         msg = self._cr.fetchall()
-        sreq = ""
         for result in msg:
             sreq = "select * from mail_followers_mail_message_subtype_rel where mail_followers_id in ( select id from mail_followers where partner_id = %s and res_model=%s and res_id = %s) and mail_message_subtype_id = 19"
             self._cr.execute(sreq, (partn.id, result[15], result[9]))
+            print self._cr.fetchall == null
             if (self._cr.fetchall):
                 count += 1
                 bod.append(result[11])
                 sub.append(result[5])
                 id.append(result[0])
                 user_id.append(result[4])
-        req = "UPDATE mail_message m SET is_notified='True' where m.id in( select mail_message_id from mail_message_res_partner_needaction_rel where res_partner_id in (select partner_id from res_users where id = "
-        req += str(self._uid)
-        req += "))"
-        self._cr.execute(req)
         for test in user_id:
             req = "select partner_id from res_users where id = "
             req += str(test)
             self._cr.execute(req)
             for result in self._cr.fetchall():
                 users.append(result[0])
-        notify_me = True
-        return {"nb": count, "notifs": bod, "subs": sub, "base": base, "id": id, "user_id": users, "notify": notify_me}
+        req = "UPDATE mail_message m SET is_notified='True' where m.id in( select mail_message_id from mail_message_res_partner_needaction_rel where res_partner_id in (select partner_id from res_users where id = "
+        req += str(self._uid)
+        req += "))"
+        self._cr.execute(req)
+        return {"nb": count, "notifs": bod, "subs": sub, "base": base, "id": id, "user_id": users}
