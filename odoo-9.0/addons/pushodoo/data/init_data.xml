@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data noupdate="1">
+        <record id="pushnotif" model="mail.message.subtype">
+            <field name="create_uid">1</field>
+            <field name="interval_number">1</field>
+            <field name="description">Push Odoo Notification</field>
+            <field name="write_uid">1</field>
+            <field name="internal">True</field>
+            <field name="name">Push Notification</field>
+            <field name="default">True</field>
+        </record>
+    </data>
+</openerp>

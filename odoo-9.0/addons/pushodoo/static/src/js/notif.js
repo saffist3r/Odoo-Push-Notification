@@ -1,7 +1,7 @@
 var base_url = "";
 var img = "";
 openerp.pushodoo = function (session) {
-    var model = new openerp.web.Model("pushodoo.config");
+    var model = new openerp.web.Model("mail.thread");
     var self = this;
 
     function demo_alert(view) {

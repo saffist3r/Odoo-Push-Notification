@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 from openerp import models, fields, api, http
-import requests
 import datetime
-import json
 from json import dumps
 
 
@@ -18,15 +16,19 @@ class Message(models.Model):
     is_notified = fields.Boolean('is notified', default=False)
 
 
-class config(models.Model):
-    _name = 'pushodoo.config'
+class MailThread(models.Model):
+    # _name = 'pushodoo.config'
     _inherit = 'mail.thread'
     message_ids = fields.One2many(
         'mail.message', 'res_id', string='Messages',
         domain=lambda self: [('model', '=', self._name)], auto_join=True, track_visibility='onchange', )
+    partner_id = fields.Many2one('res.partner', compute='_get_partner')
 
-    active = fields.Boolean('Active', track_visibility='onchange', )
-    is_checked = fields.Boolean()
+    @api.depends('partner_id')
+    def _get_partner(self):
+        partner = self.env['res.users'].browse(self.env.uid).partner_id
+        for rec in self:
+            rec.partner_id = partner.id
 
     @api.multi
     @api.returns('self', lambda value: value.id)
@@ -164,24 +166,24 @@ class config(models.Model):
         # Avoid warnings about non-existing fields
         for x in ('from', 'to', 'cc'):
             values.pop(x, None)
-        # --------------------------------------------------------------------------------------------
-        # TEST NOTIF WEB
-        # header = {"Content-Type": "application/json",
-        #           "Authorization": "Basic MDE4YWU4ZjUtYjBjOC00MDQ5LTg1OWQtODdiNDc1YTEzZjRk"}
-        #
-        # payload = {"app_id": "8e30f91d-9796-490d-a32b-1d0f451cc29c",
-        #            "included_segments": ["All"],
-        #            "contents": {"en": body}}
-        # req = requests.post("https://onesignal.com/api/v1/notifications", headers=header, data=json.dumps(payload))
-        # TEST NOTIF LOCAL
-        # print self.message_ids
-        # print self.message_follower_ids
+            # --------------------------------------------------------------------------------------------
+            # TEST NOTIF WEB
+            # header = {"Content-Type": "application/json",
+            #           "Authorization": "Basic MDE4YWU4ZjUtYjBjOC00MDQ5LTg1OWQtODdiNDc1YTEzZjRk"}
+            #
+            # payload = {"app_id": "8e30f91d-9796-490d-a32b-1d0f451cc29c",
+            #            "included_segments": ["All"],
+            #            "contents": {"en": body}}
+            # req = requests.post("https://onesignal.com/api/v1/notifications", headers=header, data=json.dumps(payload))
+            # TEST NOTIF LOCAL
+            # print self.message_ids
+            # print self.message_follower_ids
         # print self._cr
+        # print self._cr.fetchall()
         # print self._uid
         # print self.ids
         # --------------------------------------------------------------------------------------------
         # Post the message
-
         new_message = MailMessage.create(values)
 
         # Post-process: subscribe author, update message_last_post
@@ -200,15 +202,18 @@ class config(models.Model):
 
     @api.model
     def nb_notif(self):
-        user_id = ""
+        notify_me = False
         count = 0
         bod = []
         sub = []
         users = []
-        base = ""
-        req = "select value from ir_config_parameter where key LIKE 'web.base.url'"
         id = []
         user_id = []
+        base = ""
+        partn = self.env['res.users'].browse(self.env.uid).partner_id
+        # print partn.id
+        # TODO mochkla fil model lezem traka7ha
+        req = "select value from ir_config_parameter where key LIKE 'web.base.url'"
         self._cr.execute(req)
         for result in self._cr.fetchall():
             base = result[0]
@@ -216,23 +221,26 @@ class config(models.Model):
         req += str(self._uid)
         req += "))"
         self._cr.execute(req)
-        for result in self._cr.fetchall():
-            count += 1
-            bod.append(result[11])
-            sub.append(result[5])
-            id.append(result[0])
-            user_id.append(result[4])
-        config.last_notification = dumps(datetime.datetime.now(), default=json_serial)
+        msg = self._cr.fetchall()
+        sreq = ""
+        for result in msg:
+            sreq = "select * from mail_followers_mail_message_subtype_rel where mail_followers_id in ( select id from mail_followers where partner_id = %s and res_model=%s and res_id = %s) and mail_message_subtype_id = 19"
+            self._cr.execute(sreq, (partn.id, result[15], result[9]))
+            if (self._cr.fetchall):
+                count += 1
+                bod.append(result[11])
+                sub.append(result[5])
+                id.append(result[0])
+                user_id.append(result[4])
         req = "UPDATE mail_message m SET is_notified='True' where m.id in( select mail_message_id from mail_message_res_partner_needaction_rel where res_partner_id in (select partner_id from res_users where id = "
         req += str(self._uid)
         req += "))"
         self._cr.execute(req)
-        i = 0
         for test in user_id:
             req = "select partner_id from res_users where id = "
             req += str(test)
             self._cr.execute(req)
             for result in self._cr.fetchall():
                 users.append(result[0])
-                print result[0]
-        return {"nb": count, "notifs": bod, "subs": sub, "base": base, "id": id, "user_id": users}
+        notify_me = True
+        return {"nb": count, "notifs": bod, "subs": sub, "base": base, "id": id, "user_id": users, "notify": notify_me}
