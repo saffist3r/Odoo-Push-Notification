@@ -192,7 +192,7 @@ class MailThread(models.Model):
         user_id = []
         base = ""
         partn = self.env['res.users'].browse(self.env.uid).partner_id
-        notif_active = partn = self.env['res.users'].browse(self.env.uid).notif_user
+        notif_active = self.env['res.users'].browse(self.env.uid).notif_user
         req = "select value from ir_config_parameter where key LIKE 'web.base.url'"
         self._cr.execute(req)
         for result in self._cr.fetchall():
