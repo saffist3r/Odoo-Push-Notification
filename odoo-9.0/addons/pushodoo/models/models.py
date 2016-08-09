@@ -16,9 +16,7 @@ class Message(models.Model):
     is_notified = fields.Boolean('is notified', default=False)
 
 
-class MailThread(models.Model):
-    # _name = 'pushodoo.config'
-    _inherit = 'mail.thread'
+class MailThread(models.Model):    _inherit = 'mail.thread'
     message_ids = fields.One2many(
         'mail.message', 'res_id', string='Messages',
         domain=lambda self: [('model', '=', self._name)], auto_join=True, track_visibility='onchange', )
@@ -166,23 +164,6 @@ class MailThread(models.Model):
         # Avoid warnings about non-existing fields
         for x in ('from', 'to', 'cc'):
             values.pop(x, None)
-            # --------------------------------------------------------------------------------------------
-            # TEST NOTIF WEB
-            # header = {"Content-Type": "application/json",
-            #           "Authorization": "Basic MDE4YWU4ZjUtYjBjOC00MDQ5LTg1OWQtODdiNDc1YTEzZjRk"}
-            #
-            # payload = {"app_id": "8e30f91d-9796-490d-a32b-1d0f451cc29c",
-            #            "included_segments": ["All"],
-            #            "contents": {"en": body}}
-            # req = requests.post("https://onesignal.com/api/v1/notifications", headers=header, data=json.dumps(payload))
-            # TEST NOTIF LOCAL
-            # print self.message_ids
-            # print self.message_follower_ids
-        # print self._cr
-        # print self._cr.fetchall()
-        # print self._uid
-        # print self.ids
-        # --------------------------------------------------------------------------------------------
         # Post the message
         new_message = MailMessage.create(values)
 
@@ -210,8 +191,6 @@ class MailThread(models.Model):
         user_id = []
         base = ""
         partn = self.env['res.users'].browse(self.env.uid).partner_id
-        # print partn.id
-        # TODO mochkla fil model lezem traka7ha
         req = "select value from ir_config_parameter where key LIKE 'web.base.url'"
         self._cr.execute(req)
         for result in self._cr.fetchall():
@@ -224,8 +203,8 @@ class MailThread(models.Model):
         for result in msg:
             sreq = "select * from mail_followers_mail_message_subtype_rel where mail_followers_id in ( select id from mail_followers where partner_id = %s and res_model=%s and res_id = %s) and mail_message_subtype_id = 19"
             self._cr.execute(sreq, (partn.id, result[15], result[9]))
-            print self._cr.fetchall == null
-            if (self._cr.fetchall):
+            if (self._cr.fetchall()):
+                print "PASSED"
                 count += 1
                 bod.append(result[11])
                 sub.append(result[5])
