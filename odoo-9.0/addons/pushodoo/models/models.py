@@ -198,7 +198,6 @@ class MailThread(models.Model):
         for result in self._cr.fetchall():
             base = result[0]
         if notif_active:
-            print "done"
             req = "select * from  mail_message m where is_notified='False' AND m.id in( select mail_message_id from mail_message_res_partner_needaction_rel where res_partner_id in (select partner_id from res_users where id = "
             req += str(self._uid)
             req += "))"

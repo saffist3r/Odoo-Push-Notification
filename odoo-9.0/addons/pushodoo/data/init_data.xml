@@ -6,7 +6,7 @@
             <field name="interval_number">1</field>
             <field name="description">Push Odoo Notification</field>
             <field name="write_uid">1</field>
-            <field name="internal">True</field>
+            <field name="internal">False</field>
             <field name="name">Push Notification</field>
             <field name="default">True</field>
         </record>
