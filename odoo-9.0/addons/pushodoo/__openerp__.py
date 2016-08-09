@@ -25,6 +25,7 @@
     'data': [
         'views/notifications.xml',
         'data/init_data.xml',
+        'views/inherit_usr.xml',
     ],
     # only loaded in demonstration mode
     'demo': [
