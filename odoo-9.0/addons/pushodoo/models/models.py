@@ -16,7 +16,8 @@ class Message(models.Model):
     is_notified = fields.Boolean('is notified', default=False)
 
 
-class MailThread(models.Model):    _inherit = 'mail.thread'
+class MailThread(models.Model):
+    _inherit = 'mail.thread'
     message_ids = fields.One2many(
         'mail.message', 'res_id', string='Messages',
         domain=lambda self: [('model', '=', self._name)], auto_join=True, track_visibility='onchange', )
