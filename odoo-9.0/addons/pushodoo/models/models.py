@@ -192,34 +192,36 @@ class MailThread(models.Model):
         user_id = []
         base = ""
         partn = self.env['res.users'].browse(self.env.uid).partner_id
-        notif_active = self.env['res.users'].browse(self.env.uid).notif_user
-        req = "select value from ir_config_parameter where key LIKE 'web.base.url'"
-        self._cr.execute(req)
-        for result in self._cr.fetchall():
-            base = result[0]
-        if notif_active:
-            req = "select * from  mail_message m where is_notified='False' AND m.id in( select mail_message_id from mail_message_res_partner_needaction_rel where res_partner_id in (select partner_id from res_users where id = "
-            req += str(self._uid)
-            req += "))"
-            self._cr.execute(req)
-            msg = self._cr.fetchall()
-            for result in msg:
-                sreq = "select * from mail_followers_mail_message_subtype_rel where mail_followers_id in ( select id from mail_followers where partner_id = %s and res_model=%s and res_id = %s) and mail_message_subtype_id = 19"
-                self._cr.execute(sreq, (partn.id, result[15], result[9]))
-                if (self._cr.fetchall()):
-                    count += 1
-                    bod.append(result[11])
-                    sub.append(result[5])
-                    id.append(result[0])
-                    user_id.append(result[4])
-            for test in user_id:
-                req = "select partner_id from res_users where id = "
-                req += str(test)
+        notif_active_user = self.env['res.users'].browse(self.env.uid).notif_user
+        notif_active_sys = self.env['base.config.settings'].browse(self.env.uid).config_notif
+        if notif_active_sys:
+            if notif_active_user:
+                req = "select value from ir_config_parameter where key LIKE 'web.base.url'"
                 self._cr.execute(req)
                 for result in self._cr.fetchall():
-                    users.append(result[0])
-            req = "UPDATE mail_message m SET is_notified='True' where m.id in( select mail_message_id from mail_message_res_partner_needaction_rel where res_partner_id in (select partner_id from res_users where id = "
-            req += str(self._uid)
-            req += "))"
-            self._cr.execute(req)
+                    base = result[0]
+                req = "select * from  mail_message m where is_notified='False' AND m.id in( select mail_message_id from mail_message_res_partner_needaction_rel where res_partner_id in (select partner_id from res_users where id = "
+                req += str(self._uid)
+                req += "))"
+                self._cr.execute(req)
+                msg = self._cr.fetchall()
+                for result in msg:
+                    sreq = "select * from mail_followers_mail_message_subtype_rel where mail_followers_id in ( select id from mail_followers where partner_id = %s and res_model=%s and res_id = %s) and mail_message_subtype_id = 19"
+                    self._cr.execute(sreq, (partn.id, result[15], result[9]))
+                    if (self._cr.fetchall()):
+                        count += 1
+                        bod.append(result[11])
+                        sub.append(result[5])
+                        id.append(result[0])
+                        user_id.append(result[4])
+                for test in user_id:
+                    req = "select partner_id from res_users where id = "
+                    req += str(test)
+                    self._cr.execute(req)
+                    for result in self._cr.fetchall():
+                        users.append(result[0])
+                req = "UPDATE mail_message m SET is_notified='True' where m.id in( select mail_message_id from mail_message_res_partner_needaction_rel where res_partner_id in (select partner_id from res_users where id = "
+                req += str(self._uid)
+                req += "))"
+                self._cr.execute(req)
         return {"nb": count, "notifs": bod, "subs": sub, "base": base, "id": id, "user_id": users}
