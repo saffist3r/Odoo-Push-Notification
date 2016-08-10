@@ -191,15 +191,17 @@ class MailThread(models.Model):
         id = []
         user_id = []
         base = ""
+        notif_active_sys = False
         partn = self.env['res.users'].browse(self.env.uid).partner_id
         notif_active_user = self.env['res.users'].browse(self.env.uid).notif_user
-        notif_active_sys = self.env['base.config.settings'].browse(self.env.uid).config_notif
+        # notif_active_sys = self.env['base.config.settings'].search([],limit=1,order="create_date DESC").config_notif
+        req = "select * from base_config_settings order by create_date DESC"
+        self._cr.execute(req)
+        notif_active_sys = self._cr.fetchall()[0][21]
+        # print notif_active_sys
         if notif_active_sys:
             if notif_active_user:
-                req = "select value from ir_config_parameter where key LIKE 'web.base.url'"
-                self._cr.execute(req)
-                for result in self._cr.fetchall():
-                    base = result[0]
+                base = self.env["ir.config_parameter"].get_param("web.base.url")
                 req = "select * from  mail_message m where is_notified='False' AND m.id in( select mail_message_id from mail_message_res_partner_needaction_rel where res_partner_id in (select partner_id from res_users where id = "
                 req += str(self._uid)
                 req += "))"
